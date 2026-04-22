@@ -12,7 +12,6 @@ def crawl(base_url: str) -> list:
     browser.open(base_url)
     found_files = []
     for link in browser.links():
-        # sleep(0.1) # try to not DoS the server
         anchor = link.get('href')
         if anchor == '../' or anchor == './' or anchor == "Parent Directory": # don't do a path traversal, try not to get stuck
             continue
@@ -32,14 +31,15 @@ def trim_urls(url_list: list, args: argparse.Namespace):
     for url in url_list:
         split_url = urllib.parse.urlsplit(url) # remove non-path part of URL
         filename = split_url[2] # get filepath from URL
-        if args.flatten:
-            filename = filename.split("/")[-1] # if flattened, remove path except filename
-            filename = urllib.parse.unquote(filename[0:]) # parse the HTTP escape codes
-        else:
-            filename = urllib.parse.unquote(filename[1:]) # parse the HTTP escape codes
-        # print(f"Parsed filename: {filename}")
+        # if args.flatten:
+        filename = filename.split("/")[-1] # if flattened, remove path except filename
+        filename = urllib.parse.unquote(filename[0:]) # parse the HTTP escape codes
+        # else:
+        # filename = urllib.parse.unquote(filename[1:]) # parse the HTTP escape codes
+        print(f"Parsed filename: {filename}")
         file_path = Path(filename)
-        if file_path.exists():
+        file_path_partial = Path(filename + ".aria2")
+        if file_path.exists() and not file_path_partial.exists():
             to_trim.append(url)
     for url in to_trim:
         url_list.remove(url)
