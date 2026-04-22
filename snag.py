@@ -36,9 +36,10 @@ def trim_urls(url_list: list, args: argparse.Namespace):
         filename = urllib.parse.unquote(filename[0:]) # parse the HTTP escape codes
         # else:
         # filename = urllib.parse.unquote(filename[1:]) # parse the HTTP escape codes
-        print(f"Parsed filename: {filename}")
-        file_path = Path(filename)
-        file_path_partial = Path(filename + ".aria2")
+        # print(f"Parsed filename: {filename}")
+        root_path = Path(args.dir)
+        file_path = root_path / Path(filename)
+        file_path_partial = root_path / Path(filename + ".aria2")
         if file_path.exists() and not file_path_partial.exists():
             to_trim.append(url)
     for url in to_trim:
@@ -47,7 +48,7 @@ def trim_urls(url_list: list, args: argparse.Namespace):
 def download(args: argparse.Namespace):
     url_list = crawl(args.base_url)
     trim_urls(url_list, args)
-    print("#################")
+    print("######## Results ########")
     print("URLS to download: ")
     aria2_cmd = f"aria2c --max-download-limit {args.max_download_limit} -j {args.max_concurrent_downloads} -d {args.dir} -Z "
     for url in url_list:
