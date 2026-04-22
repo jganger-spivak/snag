@@ -1,5 +1,6 @@
 # Snag
-Downloads all files from a simple HTTP/HTTPS file server
+Downloads all files from a simple HTTP/HTTPS file server.
+
 Requirements:
 - aria2
 - Python 3.14
