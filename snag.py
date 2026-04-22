@@ -49,7 +49,7 @@ def download(args: argparse.Namespace):
     trim_urls(url_list, args)
     print("#################")
     print("URLS to download: ")
-    aria2_cmd = f"aria2c --max-download-limit {args.max_download_limit} -j {args.max_concurrent_downloads} -Z "
+    aria2_cmd = f"aria2c --max-download-limit {args.max_download_limit} -j {args.max_concurrent_downloads} -d {args.dir} -Z "
     for url in url_list:
         aria2_cmd += f'"{url}" '
         print(url)
@@ -64,6 +64,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="snag", description="Downloads all files from a webserver using aria2")
     parser.add_argument("base_url", type=str, help="The base URL to download from")
     parser.add_argument("-j", "--max-concurrent-downloads", type=int, default=1, help="How many simultaneous connections to use (default 1)")
+    parser.add_argument("-d", "--dir", type=str, default='.', help="What directory should files be saved in? (default current dir)")
     parser.add_argument("--max-download-limit", type=int, default=2000000, help="Maximum bandwidth per connection (default ~2MB/s)")
     parser.add_argument("--flatten", type=bool, default=False, help="UNUSED: Whether to flatten the file structure and place all downloaded files in one folder (default false)")
     args = parser.parse_args()
