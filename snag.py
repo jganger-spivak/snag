@@ -42,6 +42,8 @@ def trim_urls(url_list: list, args: argparse.Namespace):
         file_path_partial = root_path / Path(filename + ".aria2")
         if file_path.exists() and not file_path_partial.exists():
             to_trim.append(url)
+        if file_path.suffix == args.ignore_extension:
+            to_trim.append(url)
     for url in to_trim:
         url_list.remove(url)
 
@@ -58,7 +60,7 @@ def download(args: argparse.Namespace):
     if good_to_go.lower() != 'y':
         exit()
     
-    print(aria2_cmd)
+    # print(aria2_cmd)
     subprocess.call(aria2_cmd, shell=True)
 
 if __name__ == "__main__":
@@ -67,6 +69,7 @@ if __name__ == "__main__":
     parser.add_argument("-j", "--max-concurrent-downloads", type=int, default=1, help="How many simultaneous connections to use (default 1)")
     parser.add_argument("-d", "--dir", type=str, default='.', help="What directory should files be saved in? (default current dir)")
     parser.add_argument("--max-download-limit", type=int, default=2000000, help="Maximum bandwidth per connection (default ~2MB/s)")
+    parser.add_argument("--ignore-extension", type=str, default="", help="Ignore files with this extension")
     parser.add_argument("--flatten", type=bool, default=False, help="UNUSED: Whether to flatten the file structure and place all downloaded files in one folder (default false)")
     args = parser.parse_args()
     download(args)
