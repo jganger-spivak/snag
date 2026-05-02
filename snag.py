@@ -6,11 +6,11 @@ from time import sleep
 import urllib.parse
 import subprocess
 
-def crawl(base_url: str) -> list:
+def crawl(base_url: str) -> set:
     print(f"Crawling {base_url}...")
     browser = mechanicalsoup.StatefulBrowser()
     browser.open(base_url)
-    found_files = []
+    found_files = set()
     for link in browser.links():
         anchor = link.get('href')
         if anchor == '../' or anchor == './' or anchor == "Parent Directory": # don't do a path traversal, try not to get stuck
@@ -19,15 +19,15 @@ def crawl(base_url: str) -> list:
             continue
         if anchor[-1] == '/': 
             # print(f"Directory: {anchor}")
-            found_files.extend(crawl(browser.url+anchor))
+            found_files.update(crawl(browser.url+anchor))
         else:
             # print(f"File: {anchor}")
-            found_files.append(browser.url+anchor)
+            found_files.add(browser.url+anchor)
     browser.close()
     return found_files
 
-def trim_urls(url_list: list, args: argparse.Namespace):
-    to_trim = []
+def trim_urls(url_list: set, args: argparse.Namespace):
+    to_trim = set()
     for url in url_list:
         split_url = urllib.parse.urlsplit(url) # remove non-path part of URL
         filename = split_url[2] # get filepath from URL
@@ -40,16 +40,16 @@ def trim_urls(url_list: list, args: argparse.Namespace):
         root_path = Path(args.dir)
         file_path = root_path / Path(filename)
         file_path_partial = root_path / Path(filename + ".aria2")
-        
-        # TODO clean up this since every trim option results in the same action
-        if file_path.exists() and not file_path_partial.exists():
-            to_trim.append(url)
-        if file_path.suffix == args.ignore_extension:
-            to_trim.append(url)
+
+        # TODO clean this up since every trim option results in the same action
         if args.only_extension != "" and file_path.suffix != args.only_extension:
-            to_trim.append(url)
-    for url in to_trim:
-        url_list.remove(url)
+            to_trim.add(url)
+        if file_path.exists() and not file_path_partial.exists():
+            to_trim.add(url)
+        if file_path.suffix == args.ignore_extension:
+            to_trim.add(url)
+    
+    url_list -= to_trim
 
 def download(args: argparse.Namespace):
     url_list = crawl(args.base_url)
